@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Phishing Warning</title>
+  <style>
+    html, body { height:100%; margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background:#1b1a1a; color:#fff; }
+    .wrap { height:100%; display:flex; align-items:center; justify-content:center; }
+    .card { background:#212121; padding:26px 26px 18px; border-radius:12px; width:min(520px, 92%); box-shadow: 0 10px 30px rgba(0,0,0,.35); text-align:center; }
+    .spinner { width:64px; height:64px; border-radius:50%; border:4px solid #333; border-top-color:#e53935; animation:spin 1s linear infinite; margin:0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .title { font-size:22px; font-weight:700; margin-bottom:6px; }
+    .desc { font-size:14px; opacity:.9; margin-bottom:14px; }
+    .url { font-size:13px; background:#141414; border:1px solid #333; padding:8px 10px; border-radius:6px; overflow-wrap:anywhere; margin-bottom:16px; }
+    .actions { display:flex; gap:12px; justify-content:center; }
+    .btn { padding:10px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    .btn-danger { background:#e53935; color:#fff; }
+    .btn-secondary { background:#ffc107; color:#222; }
+  </style>
+  <script defer src="warning.js"></script>
+  </head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="title">Phishing Warning</div>
+      <div class="desc">This site appears <b id="verdict">suspicious</b>. Are you sure you want to proceed?</div>
+      <div class="url" id="target"></div>
+      <div class="actions">
+        <button id="proceed" class="btn btn-secondary">Proceed Anyway</button>
+        <button id="close" class="btn btn-danger">Stay Safe (Close Tab)</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

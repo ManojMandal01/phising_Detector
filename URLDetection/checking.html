@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Checking site safety…</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #121212;
+      color: #eaeaea;
+    }
+    .container {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+      text-align: center;
+    }
+    .logo {
+      width: 72px;
+      height: 72px;
+      background: conic-gradient(#4285F4, #34A853, #FBBC05, #EA4335, #4285F4);
+      border-radius: 50%;
+      -webkit-mask: radial-gradient(transparent 44%, #000 45%);
+              mask: radial-gradient(transparent 44%, #000 45%);
+      animation: spin 1.2s linear infinite;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .title { font-size: 20px; font-weight: 600; }
+    .subtitle { font-size: 14px; opacity: 0.85; max-width: 520px; }
+    .muted { font-size: 12px; opacity: 0.6; }
+    .actions { display: flex; gap: 10px; margin-top: 8px; }
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #1e1e1e;
+      color: #eaeaea;
+      cursor: pointer;
+    }
+    .btn:hover { background: #262626; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo" aria-hidden="true"></div>
+    <div class="title">Checking site safety…</div>
+    <div id="targetUrl" class="subtitle"></div>
+    <div class="muted">This will only take a moment.</div>
+    <div class="actions" style="display:none" id="fallbackActions">
+      <button class="btn" id="proceedNow">Proceed Now</button>
+      <button class="btn" id="closeTab">Close Tab</button>
+    </div>
+  </div>
+  <script src="checking.js"></script>
+</body>
+</html>

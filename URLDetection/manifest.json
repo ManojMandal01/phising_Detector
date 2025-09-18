@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Phishing Detector",
+  "version": "1.0",
+  "description": "Detect phishing websites by checking against server.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "notifications",
+    "webNavigation"
+    ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "checking.html",
+        "checking.js",
+        "warning.html",
+        "warning.js",
+        "icons/icon16.png",
+        "icons/icon48.png",
+        "icons/icon128.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
