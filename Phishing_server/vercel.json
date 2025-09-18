@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.py", "use": "@vercel/python" }
+  ],
+  "functions": {
+    "server.py": {
+      "runtime": "python3.11",
+      "includeFiles": [
+        "data_bal - 20000.xlsx"
+      ]
+    }
+  },
+  "routes": [
+    { "src": "/check_url", "dest": "server.py" }
+  ],
+  "env": {
+    "PYTHONUNBUFFERED": "1"
+  }
+}
