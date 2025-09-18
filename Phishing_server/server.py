@@ -374,6 +374,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+import time
 import pandas as pd
 import requests
 from urllib.parse import urlparse
@@ -443,21 +444,65 @@ def manual_rules(url):
 VT_API_KEY = os.environ.get("VT_API_KEY")  # Read from environment for security
 VT_URL = "https://www.virustotal.com/vtapi/v2/url/report"
 
+# In-memory cache and simple rate limiting for VT to respect free tier limits
+VT_CACHE_TTL = 24 * 60 * 60  # 24 hours
+VT_RATE_LIMIT_PER_MIN = 3     # max VT calls per minute
+_vt_cache = {}               # key: normalized url -> (verdict, timestamp)
+_vt_window_start = 0.0
+_vt_count = 0
+_vt_cooldown_until = 0.0
+
+def _vt_allowed_now():
+    global _vt_window_start, _vt_count, _vt_cooldown_until
+    now = time.time()
+    # Respect cooldown (e.g., after 429s)
+    if now < _vt_cooldown_until:
+        return False
+    if now - _vt_window_start >= 60:
+        _vt_window_start = now
+        _vt_count = 0
+    return _vt_count < VT_RATE_LIMIT_PER_MIN
+
+def _vt_record_call():
+    global _vt_count
+    _vt_count += 1
+
 def virustotal_check(url):
+    # Return cached verdict if fresh
+    now = time.time()
+    cached = _vt_cache.get(url)
+    if cached and (now - cached[1]) < VT_CACHE_TTL:
+        return cached[0]
+
     if not VT_API_KEY:
         print("VirusTotal API key not set. Set VT_API_KEY environment variable to enable VT checks.")
         return "unknown"
+
+    if not _vt_allowed_now():
+        # Over budget; skip VT query to avoid 429s
+        return "unknown"
+
     params = {"apikey": VT_API_KEY, "resource": url}
     try:
-        response = requests.get(VT_URL, params=params, timeout=10)
+        _vt_record_call()
+        response = requests.get(VT_URL, params=params, timeout=5)
+        # Handle rate limiting explicitly
+        if response.status_code == 429:
+            # Enter short cooldown to avoid hammering
+            global _vt_cooldown_until
+            _vt_cooldown_until = time.time() + 60  # 1 minute cooldown
+            return "unknown"
+
         response.raise_for_status()
         result = response.json()
         if result.get("response_code") == 0:
-            return "unknown"
+            verdict = "unknown"
         elif result.get("positives", 0) > 0:
-            return "malicious"
+            verdict = "malicious"
         else:
-            return "legitimate"
+            verdict = "legitimate"
+        _vt_cache[url] = (verdict, now)
+        return verdict
     except Exception as e:
         print("VirusTotal error:", e)
         return "error"
@@ -496,13 +541,11 @@ def check_url():
             "source": "manual_rules"
         })
 
-    # If manual rules consider it legitimate, still consult VT as a final guard if you want.
-    # To minimize latency, we go to VT directly here once (current design).
-    vt_verdict = virustotal_check(url)
+    # Balanced profile: if manual rules consider it legitimate, skip VT to save quota/latency
     return jsonify({
         "url": url,
-        "verdict": vt_verdict,
-        "source": "virustotal"
+        "verdict": "legitimate",
+        "source": "manual_rules"
     })
 
 if __name__ == "__main__":
